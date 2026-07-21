@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Request, Response
-from rembg import remove
+from rembg import remove, new_session
 import uvicorn
 import base64
 import os
 
 app = FastAPI()
+my_session = new_session("u2netp")
 
 @app.get("/")
 def root():
@@ -13,7 +14,7 @@ def root():
 @app.post("/remove-bg")
 async def remove_bg(request: Request):
     content = await request.body()
-    output_image = remove(content)
+    output_image = remove(content, session=my_session)
     encoded_image = base64.b64encode(output_image).decode('utf-8')
     return encoded_image 
 
