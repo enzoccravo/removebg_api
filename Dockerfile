@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+ENV U2NET_HOME=/app/.u2net1
+RUN python -c "from rembg import new_session; new_session('u2netp')"
+
 COPY . .
 
 ENV PORT=10000
