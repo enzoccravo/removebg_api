@@ -4,16 +4,14 @@ os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
-os.environ["U2NET_HOME"] = "/tmp/.u2net"
 
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request
 import uvicorn
 import base64
 import io
 import gc
 
 app = FastAPI()
-
 my_session = None
 
 @app.get("/")
