@@ -1,23 +1,25 @@
 import os
+import gc
+import io
+import base64
+import asyncio
+from fastapi import FastAPI, Request, Response
+import uvicorn
+from PIL import Image
+
+# Configurações anti-ram
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-print(">> STARTING", flush=True)
+print(">> STARTING !!!!!!!!!!!!", flush=True)
 from rembg import new_session, remove
 my_session = new_session("u2netp")
-print(">> AI LOADED", flush=True)
-
-from fastapi import FastAPI, Request
-import uvicorn
-import base64
-import io
-import gc
+print(">> AI LOADED !!!!!!!!!!!!", flush=True)
 
 app = FastAPI()
-my_session = None
 
 @app.get("/")
 def root():
@@ -30,28 +32,29 @@ async def remove_bg(request: Request):
         content = await request.body()
         
         print("[2] Redimensionando para 600x600...", flush=True)
-        from PIL import Image
         img = Image.open(io.BytesIO(content))
         img.thumbnail((600, 600))
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
         small_content = img_byte_arr.getvalue()
         
-        print("[3] Limpando RAM...", flush=True)
+        print("[3] Limpando rastros de RAM...", flush=True)
         del img
         del content
         gc.collect()
 
-        print("[4] Executando motor da IA...", flush=True)
+        print("[4] Executando IA (sem carregar nada, ja esta na memoria!)...", flush=True)
         output_image = await asyncio.to_thread(remove, small_content, session=my_session)
         
-        print("[5] Sucesso! Devolvendo para o Android.", flush=True)
+        print("[5] Sucesso! Devolvendo imagem...", flush=True)
         encoded_image = base64.b64encode(output_image).decode('utf-8')
-        return encoded_image
+        
+        # AQUI ESTAVA O BUG! Retornando como texto puro (sem aspas do JSON)
+        return Response(content=encoded_image, media_type="text/plain")
         
     except Exception as e:
         print(f"[ERRO FATAL] {str(e)}", flush=True)
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=500)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
