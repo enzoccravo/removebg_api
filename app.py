@@ -33,7 +33,7 @@ async def remove_bg(request: Request):
         
         print("[2] Redimensionando para 600x600...", flush=True)
         img = Image.open(io.BytesIO(content))
-        img.thumbnail((600, 600))
+        img.thumbnail((320, 320))
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format='PNG')
         small_content = img_byte_arr.getvalue()
