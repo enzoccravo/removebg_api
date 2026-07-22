@@ -5,6 +5,11 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
+print(">> STARTING", flush=True)
+from rembg import new_session, remove
+my_session = new_session("u2netp")
+print(">> AI LOADED", flush=True)
+
 from fastapi import FastAPI, Request
 import uvicorn
 import base64
@@ -37,16 +42,10 @@ async def remove_bg(request: Request):
         del content
         gc.collect()
 
-        print("[4] Checando motor da IA...", flush=True)
-        from rembg import remove, new_session
-        global my_session
-        if my_session is None:
-            my_session = new_session("u2netp")
-            
-        print("[5] Executando IA na SALA DOS FUNDOS (Thread separada)...", flush=True)
+        print("[4] Executando motor da IA...", flush=True)
         output_image = await asyncio.to_thread(remove, small_content, session=my_session)
         
-        print("[6] Sucesso! Devolvendo para o Android.", flush=True)
+        print("[5] Sucesso! Devolvendo para o Android.", flush=True)
         encoded_image = base64.b64encode(output_image).decode('utf-8')
         return encoded_image
         
